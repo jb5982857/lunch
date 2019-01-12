@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.lunch.place.dao.PlaceDao">
+    <!--如果返回实体类，需要在这里定义-->
+    <resultMap id="PlaceMap" type="com.lunch.place.entity.in.Place">
+        <!--column:在数据库中的字段名称     property:java类中对应的变量名    jdbcType:数据库中该字段的类型-->
+        <id column="id" property="id" jdbcType="INTEGER"/>
+        <result column="account_id" property="accountId" jdbcType="INTEGER"/>
+        <result column="name" property="placeName" jdbcType="VARCHAR"/>
+        <result column="state" property="state" jdbcType="INTEGER"/>
+        <!--TIMESTAMP而不用DATE为了保证精度问题-->
+        <result column="time" property="time" jdbcType="TIMESTAMP"/>
+        <result column="desc" property="desc" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <!--复用的字段,通过include refid="Base_Column_List" 复用-->
+    <sql id="Account_Base_Column_List">
+        `id`, `account_id`, `name`, `state`, `time`, `desc`
+    </sql>
+
+    <insert id="addPlace" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO place(`account_id`,`name`,`state`,`time`) VALUES (#{accountId},#{placeName},#{state},#{time})
+    </insert>
+
+    <update id="likePlace">
+        UPDATE place SET `desc` = #{desc},`time` = #{time} ,`state` = 1 WHERE `id`=#{id}
+    </update>
+
+    <update id="hatePlace">
+        UPDATE place SET `desc` = #{desc},`time` = #{time} ,`state` = 2 WHERE `id`=#{id}
+    </update>
+
+    <select id="queryIdByAccountIdAndPlace" resultType="java.lang.Long">
+        SELECT `id` FROM place WHERE `account_id`=#{accountId} AND `name` = #{place}
+    </select>
+
+    <select id="queryAllPlaceByAccountId" resultMap="PlaceMap">
+        SELECT
+        <include refid="Account_Base_Column_List"/>
+        FROM place WHERE `account_id` = #{id}
+        <if test="state!=null">AND `state` = #{state}</if>
+    </select>
+</mapper>

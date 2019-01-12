@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.lunch.account.dao.UserDao">
+    <!--如果返回实体类，需要在这里定义-->
+    <resultMap id="UserResultMap" type="com.lunch.support.entity.AccessUser">
+        <!--column:在数据库中的字段名称     property:java类中对应的变量名    jdbcType:数据库中该字段的类型-->
+        <id column="id" property="id" jdbcType="INTEGER"/>
+        <result column="username" property="username" jdbcType="VARCHAR"/>
+        <result column="password" property="password" jdbcType="VARCHAR"/>
+        <result column="session" property="session" jdbcType="VARCHAR"/>
+        <result column="uid" property="uid" jdbcType="VARCHAR"/>
+        <result column="phone" property="phone" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <!--复用的字段,通过include refid="Base_Column_List" 复用-->
+    <sql id="Account_Base_Column_List">
+        `id`, `username`, `password`, `session`, `uid`, `phone`
+    </sql>
+
+    <!--根据username来查用户信息-->
+    <!--返回可能是一个User对象，可能是一个List，两者不需要做处理-->
+    <!--查询必须有resultMap参数-->
+    <select id="selectByUsername" resultMap="UserResultMap"
+            parameterType="java.lang.String">
+        SELECT
+        <include refid="Account_Base_Column_List"/>
+        FROM account
+        WHERE `username` = #{username}
+    </select>
+
+    <!--注册已经通过初步认证的账号-->
+    <!--返回插入数据的id-->
+    <insert id="registerByUser" parameterType="com.lunch.support.entity.AccessUser" useGeneratedKeys="true"
+            keyProperty="id" keyColumn="id">
+        INSERT INTO account(
+        <if test="id!=null">`id`,</if>
+        `username`,`password`,`session`,`uid`,`phone`) VALUES (
+        <if test="id!=null">#{id},</if>
+        #{username},#{password},#{session},#{uid},#{phone})
+    </insert>
+
+    <!--根据id更新数据库中对应的账号的登录时间-->
+    <update id="updateLoginTime" useGeneratedKeys="true" keyProperty="id"
+            keyColumn="id">
+        UPDATE `account` SET `login_time`=#{date} WHERE `id`=#{id}
+    </update>
+
+    <select id="queryPwdByUsername" parameterType="java.lang.String">
+        SELECT `password` FROM `account` WHERE `username`=#{username}
+    </select>
+
+    <update id="updatePwdById">
+        UPDATE `account` SET `password`=#{newPwd} WHERE `id`=#{id}
+    </update>
+
+    <select id="selectById" resultMap="UserResultMap">
+        SELECT
+        <include refid="Account_Base_Column_List"/>
+        FROM `account` WHERE `id`=#{id}
+    </select>
+</mapper>
