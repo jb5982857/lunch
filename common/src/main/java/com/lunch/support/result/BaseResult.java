@@ -1,5 +1,7 @@
 package com.lunch.support.result;
 
+import com.alibaba.fastjson.JSON;
+
 /**
  * 返回有客户端的基础参数
  */
@@ -31,6 +33,6 @@ public class BaseResult {
     }
 
     public String toJson() {
-        return String.format("{code:%d,desc:%s}", code, desc);
+        return JSON.toJSONString(this);
     }
 }

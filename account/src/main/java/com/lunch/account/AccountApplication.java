@@ -14,7 +14,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 //用redis时必须要在这里配置
 @EnableScheduling
 //如果bean在其他路径模块的时候，默认是不会被扫描到的，需要这里添加下路径
-@ComponentScan(basePackages = {"com.lunch.account", "com.lunch.support"})
+@ComponentScan(basePackages = {"com.lunch.*"})
 @EnableCaching
 @EnableEurekaClient
 public class AccountApplication {

@@ -1,7 +1,7 @@
 package com.lunch.account.service;
 
-import com.lunch.support.config.StringRedisService;
 import com.lunch.account.dao.UserDao;
+import com.lunch.redis.support.StringRedisService;
 import com.lunch.support.entity.BaseUser;
 import com.lunch.support.entity.AccessUser;
 import com.lunch.support.entity.Token;

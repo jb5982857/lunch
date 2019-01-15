@@ -10,6 +10,7 @@ import com.lunch.support.controller.BaseController;
 import com.lunch.support.result.BaseResult;
 import com.lunch.account.service.UserService;
 import com.lunch.support.tool.AuthImageUtils;
+import com.lunch.support.tool.LogNewUtils;
 import com.lunch.support.tool.LogUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,7 +18,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.imageio.ImageIO;
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.util.Map;
 
 @RestController
 //添加父路径
@@ -28,7 +34,7 @@ public class AccountController extends BaseController {
 
     @RequestMapping(value = "/register", method = {RequestMethod.POST, RequestMethod.GET})
     public BaseResult registerAccount(BaseUser baseUser) {
-        LogUtils.info("registerAccount :" + baseUser.toString());
+        LogNewUtils.info("registerAccount :" + baseUser.toString());
 
         AccessUser user = userService.registerUser(baseUser);
         if (user != null) {
@@ -39,7 +45,7 @@ public class AccountController extends BaseController {
 
     @RequestMapping(value = "/login", method = {RequestMethod.POST, RequestMethod.GET})
     public BaseResult login(BaseUser baseUser) {
-        LogUtils.info("login :" + baseUser.toString());
+        LogNewUtils.info("login :" + baseUser.toString());
 
         AccessUser user = userService.login(baseUser);
         if (user != null) {
@@ -61,13 +67,38 @@ public class AccountController extends BaseController {
 
     //获取图形验证码
     @GetMapping("/image_code")
-    public void getImageCode(String deviceId, HttpServletResponse response) {
+    public void getImageCode(String deviceId, HttpServletResponse resp) {
         if (deviceId == null) {
-            LogUtils.info("deviceId is null");
+            LogNewUtils.info("deviceId is null");
             return;
         }
-        LogUtils.info("deviceId:" + deviceId);
+        LogNewUtils.info("deviceId:" + deviceId);
+        Map<String, Object> result = AuthImageUtils.getAuthImage();
 
-        userService.saveImageCodeByDeviceId(deviceId, AuthImageUtils.getAuthImage(response));
+        String code = (String) result.get(AuthImageUtils.CODE);
+        userService.saveImageCodeByDeviceId(deviceId, code);
+
+        BufferedImage buffImg = (BufferedImage) result.get(AuthImageUtils.IMAGE);
+        // 禁止图像缓存。
+        resp.setHeader("Pragma", "no-cache");
+        resp.setHeader("Cache-Control", "no-cache");
+        resp.setDateHeader("Expires", 0);
+        resp.setContentType("image/jpeg");
+        ServletOutputStream sos = null;
+        try {
+            // 将图像输出到Servlet输出流中。
+            sos = resp.getOutputStream();
+            ImageIO.write(buffImg, "jpeg", sos);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if (sos != null) {
+                try {
+                    sos.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
     }
 }

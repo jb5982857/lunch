@@ -1,10 +1,11 @@
-package com.lunch.support.config;
+package com.lunch.place.config;
 
 import com.lunch.support.constants.Code;
 import com.lunch.support.constants.S;
 import com.lunch.support.exception.ParamsException;
 import com.lunch.support.exception.UsernameException;
 import com.lunch.support.result.BaseResult;
+import com.lunch.support.tool.LogNewUtils;
 import com.lunch.support.tool.LogUtils;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -23,15 +24,15 @@ public class GlobalExceptionHandler {
     @ResponseBody
     public BaseResult deal(Exception ex) {
         if (ex instanceof ParamsException) {
-            LogUtils.printException("doThrow params error!", ex);
+            LogNewUtils.printException("doThrow params error!", ex);
             return PARAM_ERROR;
         }
 
         if (ex instanceof UsernameException) {
-            LogUtils.printException("doThrow username error!", ex);
+            LogNewUtils.printException("doThrow username error!", ex);
             return USERNAME_INVALID;
         }
-        LogUtils.printException("server inner error!", ex);
+        LogNewUtils.printException("server inner error!", ex);
         return INNER_ERROR;
     }
 }

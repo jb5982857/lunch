@@ -9,6 +9,7 @@ import com.lunch.support.constants.Code;
 import com.lunch.support.constants.S;
 import com.lunch.support.controller.BaseController;
 import com.lunch.support.result.BaseResult;
+import com.lunch.support.tool.LogNewUtils;
 import com.lunch.support.tool.LogUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -51,7 +52,7 @@ public class PlaceController extends BaseController {
     public BaseResult getPlaces(String username) {
         List<Place> places = placeService.getAllList(username);
         if (places == null || places.size() == 0) {
-            LogUtils.info("can not find place by username " + username);
+            LogNewUtils.info("can not find place by username " + username);
             return new BaseResult(Code.QUERY_PLACE_NULL, S.QUERY_PLACE_EMPTY);
         }
         return new PlaceResult(places);
@@ -62,7 +63,7 @@ public class PlaceController extends BaseController {
     public BaseResult getLikePlace(String username) {
         List<Place> places = placeService.getLikePlace(username);
         if (places == null || places.size() == 0) {
-            LogUtils.info("can not find place by username " + username);
+            LogNewUtils.info("can not find place by username " + username);
             return new BaseResult(Code.QUERY_PLACE_NULL, S.QUERY_PLACE_EMPTY);
         }
         return new PlaceResult(places);
@@ -73,7 +74,7 @@ public class PlaceController extends BaseController {
     public BaseResult getHatePlace(String username) {
         List<Place> places = placeService.getHatePlace(username);
         if (places == null || places.size() == 0) {
-            LogUtils.info("can not find place by username " + username);
+            LogNewUtils.info("can not find place by username " + username);
             return new BaseResult(Code.QUERY_PLACE_NULL, S.QUERY_PLACE_EMPTY);
         }
         return new PlaceResult(places);
@@ -84,7 +85,7 @@ public class PlaceController extends BaseController {
     public BaseResult getAddedPlace(String username) {
         List<Place> places = placeService.getAddPlace(username);
         if (places == null || places.size() == 0) {
-            LogUtils.info("can not find place by username " + username);
+            LogNewUtils.info("can not find place by username " + username);
             return new BaseResult(Code.QUERY_PLACE_NULL, S.QUERY_PLACE_EMPTY);
         }
         return new PlaceResult(places);

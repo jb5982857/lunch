@@ -1,4 +1,4 @@
-package com.lunch.support.config;
+package com.lunch.redis.support;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;

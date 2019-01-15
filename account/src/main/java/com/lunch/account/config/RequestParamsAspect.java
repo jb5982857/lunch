@@ -3,8 +3,9 @@ package com.lunch.account.config;
 import com.lunch.support.entity.BaseUser;
 import com.lunch.support.exception.ParamsException;
 import com.lunch.support.exception.UsernameException;
+import com.lunch.support.tool.LogNewUtils;
 import com.lunch.support.tool.LogUtils;
-import com.lunch.support.tool.StringCheckUtils;
+import com.lunch.support.tool.StringUtils;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
@@ -37,8 +38,8 @@ public class RequestParamsAspect {
                 if (((BaseUser) arg).isEmpty()) {
                     throw new ParamsException("param error " + request.getRequestURL().toString());
                 }
-                if (!StringCheckUtils.checkUsername(((BaseUser) arg).getUsername())) {
-                    LogUtils.info("username " + ((BaseUser) arg).getUsername() + " is not ok");
+                if (!StringUtils.checkUsername(((BaseUser) arg).getUsername())) {
+                    LogNewUtils.info("username " + ((BaseUser) arg).getUsername() + " is not ok");
                     throw new UsernameException("username invaild " + request.getRequestURL().toString());
                 }
                 break;

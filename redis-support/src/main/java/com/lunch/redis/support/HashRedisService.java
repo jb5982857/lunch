@@ -1,4 +1,4 @@
-package com.lunch.support.config;
+package com.lunch.redis.support;
 
 import org.springframework.data.redis.core.HashOperations;
 import org.springframework.stereotype.Service;

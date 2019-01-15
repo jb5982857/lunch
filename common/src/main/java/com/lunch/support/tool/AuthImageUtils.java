@@ -1,17 +1,18 @@
 package com.lunch.support.tool;
 
-import javax.imageio.ImageIO;
-import javax.servlet.ServletOutputStream;
-import javax.servlet.http.HttpServletResponse;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Random;
 
 /**
  * 产生验证码图片的工具类
  */
 public class AuthImageUtils {
+    public static final String CODE = "code";
+    public static final String IMAGE = "image";
+
     // 验证码图片的宽度。
     private static int width = 50;
     // 验证码图片的高度。
@@ -25,7 +26,10 @@ public class AuthImageUtils {
     static char[] codeSequence = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9'};
 
     //返回image_code
-    public static String getAuthImage(HttpServletResponse resp) {
+    //key "code" value （String）code
+    //key "image" value BufferedImage
+    public static Map<String, Object> getAuthImage() {
+        Map<String, Object> result = new HashMap<>(2);
         initImage();
         // 定义图像buffer
         BufferedImage buffImg = new BufferedImage(width, height,
@@ -53,7 +57,7 @@ public class AuthImageUtils {
             g.drawLine(x, y, x + xl, y + yl);
         }
         // randomCode用于保存随机产生的验证码，以便用户登录后进行验证。
-        StringBuffer randomCode = new StringBuffer();
+        StringBuilder randomCode = new StringBuilder();
         int red = 0, green = 0, blue = 0;
         // 随机产生codeCount数字的验证码。
         for (int i = 0; i < codeCount; i++) {
@@ -69,28 +73,9 @@ public class AuthImageUtils {
             // 将产生的四个随机数组合在一起。
             randomCode.append(strRand);
         }
-        // 禁止图像缓存。
-        resp.setHeader("Pragma", "no-cache");
-        resp.setHeader("Cache-Control", "no-cache");
-        resp.setDateHeader("Expires", 0);
-        resp.setContentType("image/jpeg");
-        ServletOutputStream sos = null;
-        try {
-            // 将图像输出到Servlet输出流中。
-            sos = resp.getOutputStream();
-            ImageIO.write(buffImg, "jpeg", sos);
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            if (sos != null) {
-                try {
-                    sos.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-        return randomCode.toString();
+        result.put(IMAGE, buffImg);
+        result.put(CODE, randomCode.toString());
+        return result;
     }
 
     /**

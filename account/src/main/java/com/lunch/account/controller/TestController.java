@@ -3,6 +3,7 @@ package com.lunch.account.controller;
 import com.lunch.support.entity.AccessUser;
 import com.lunch.account.service.UserService;
 import com.lunch.support.controller.BaseController;
+import com.lunch.support.tool.LogNewUtils;
 import com.lunch.support.tool.LogUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,7 +24,7 @@ public class TestController extends BaseController {
 
     @GetMapping("/user")
     public List<AccessUser> getUser(String username) {
-        LogUtils.info("getUser and username is " + username);
+        LogNewUtils.info("getUser and username is " + username);
         return userService.getUserByUsername(username);
     }
 

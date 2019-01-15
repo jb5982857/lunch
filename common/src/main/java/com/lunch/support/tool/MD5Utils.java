@@ -43,8 +43,9 @@ public class MD5Utils {
         md5Update(s.getBytes(), s.length());
         md5Final();
         digestHexStr = "";
-        for (i = 0; i < 16; i++)
+        for (i = 0; i < 16; i++) {
             digestHexStr = digestHexStr + byteHEX(digest[i]);
+        }
         return digestHexStr;
     }
 

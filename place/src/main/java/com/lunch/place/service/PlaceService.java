@@ -5,7 +5,7 @@ import com.lunch.place.entity.in.Place;
 import com.lunch.place.entity.out.BasePlace;
 import com.lunch.place.entity.out.PlaceState;
 import com.lunch.place.feignService.IAccountService;
-import com.lunch.support.config.StringRedisService;
+import com.lunch.redis.support.StringRedisService;
 import com.lunch.support.entity.AccessUser;
 import com.lunch.support.service.BaseService;
 import org.springframework.beans.factory.annotation.Autowired;

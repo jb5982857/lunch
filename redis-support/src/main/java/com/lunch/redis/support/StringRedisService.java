@@ -1,6 +1,5 @@
-package com.lunch.support.config;
+package com.lunch.redis.support;
 
-import com.lunch.support.config.BaseRedisService;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Service;
 

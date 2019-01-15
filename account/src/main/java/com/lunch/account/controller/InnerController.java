@@ -1,9 +1,10 @@
 package com.lunch.account.controller;
 
 import com.lunch.account.dao.UserDao;
-import com.lunch.support.config.StringRedisService;
+import com.lunch.redis.support.StringRedisService;
 import com.lunch.support.controller.BaseController;
 import com.lunch.support.entity.AccessUser;
+import com.lunch.support.tool.LogNewUtils;
 import com.lunch.support.tool.LogUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -25,19 +26,19 @@ public class InnerController extends BaseController {
         AccessUser redisUser = userRedisService.get(username);
         if (redisUser == null) {
             //redis中没有账号，需要从db中找
-            LogUtils.info("redis do not find username " + username + " , find it in db now!");
+            LogNewUtils.info("redis do not find username " + username + " , find it in db now!");
             List<AccessUser> users = mUserDao.selectByUsername(username);
             if (users == null || users.size() == 0) {
-                LogUtils.info("add place but username " + username + " do not find in db");
+                LogNewUtils.info("add place but username " + username + " do not find in db");
                 return -1;
             }
 
-            LogUtils.info("find username " + username + " by db");
+            LogNewUtils.info("find username " + username + " by db");
             AccessUser dbUser = users.get(0);
             return dbUser.getId();
         }
 
-        LogUtils.info("redis found username " + username);
+        LogNewUtils.info("redis found username " + username);
         return redisUser.getId();
     }
 }

@@ -1,4 +1,4 @@
-package com.lunch.support.serializer;
+package com.lunch.redis.support;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.serializer.SerializerFeature;

@@ -1,7 +1,6 @@
-package com.lunch.support.config;
+package com.lunch.redis.support;
 
 
-import com.lunch.support.serializer.FastJsonRedisSerializer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CachingConfigurerSupport;
 import org.springframework.context.annotation.Bean;
