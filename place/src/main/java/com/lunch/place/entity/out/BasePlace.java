@@ -7,11 +7,11 @@ public class BasePlace {
 
     private String place;
 
-    private String username;
+    private String session;
 
     //检查是否参数有空
     public boolean isEmpty(String... excepts) {
-        return username == null || place == null;
+        return session == null || place == null;
     }
 
     public String getPlace() {
@@ -22,12 +22,12 @@ public class BasePlace {
         this.place = place;
     }
 
-    public String getUsername() {
-        return username;
+    public String getSession() {
+        return session;
     }
 
-    public void setUsername(String username) {
-        this.username = username;
+    public void setSession(String username) {
+        this.session = username;
     }
 
 

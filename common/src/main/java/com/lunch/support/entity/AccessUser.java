@@ -1,6 +1,7 @@
 package com.lunch.support.entity;
 
 import com.lunch.support.tool.MD5Utils;
+import com.lunch.support.tool.StringUtils;
 
 /**
  * 通过认证了的账号
@@ -9,13 +10,13 @@ public class AccessUser extends BaseUser {
 
     private String uid;
 
-    //session暂时不用，后面再想想
-    private String session;
+    //会话，过期时间7天
+    private Session session = new Session("", 0);
 
     private String phone;
 
     //token过期时间，存放在redis中
-    private Token token;
+    private Token token = new Token("", 0);
 
     public AccessUser() {
     }
@@ -26,6 +27,14 @@ public class AccessUser extends BaseUser {
         this.setPassword(MD5Utils.toMD5(baseUser.getPassword()));
     }
 
+    public boolean hasToken() {
+        return !StringUtils.isEmpty(token.getResult());
+    }
+
+    public boolean hasSession() {
+        return !StringUtils.isEmpty(session.getResult());
+    }
+
     public String getUid() {
         return uid;
     }
@@ -34,11 +43,11 @@ public class AccessUser extends BaseUser {
         this.uid = uid;
     }
 
-    public String getSession() {
+    public Session getSession() {
         return session;
     }
 
-    public void setSession(String session) {
+    public void setSession(Session session) {
         this.session = session;
     }
 

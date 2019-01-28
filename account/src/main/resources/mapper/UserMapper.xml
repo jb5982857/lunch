@@ -7,14 +7,14 @@
         <id column="id" property="id" jdbcType="INTEGER"/>
         <result column="username" property="username" jdbcType="VARCHAR"/>
         <result column="password" property="password" jdbcType="VARCHAR"/>
-        <result column="session" property="session" jdbcType="VARCHAR"/>
+        <!--<result column="session" property="session" jdbcType="VARCHAR"/>-->
         <result column="uid" property="uid" jdbcType="VARCHAR"/>
         <result column="phone" property="phone" jdbcType="VARCHAR"/>
     </resultMap>
 
     <!--复用的字段,通过include refid="Base_Column_List" 复用-->
     <sql id="Account_Base_Column_List">
-        `id`, `username`, `password`, `session`, `uid`, `phone`
+        `id`, `username`, `password`, `uid`, `phone`
     </sql>
 
     <!--根据username来查用户信息-->
@@ -34,9 +34,9 @@
             keyProperty="id" keyColumn="id">
         INSERT INTO account(
         <if test="id!=null">`id`,</if>
-        `username`,`password`,`session`,`uid`,`phone`) VALUES (
+        `username`,`password`,`uid`,`phone`) VALUES (
         <if test="id!=null">#{id},</if>
-        #{username},#{password},#{session},#{uid},#{phone})
+        #{username},#{password},#{uid},#{phone})
     </insert>
 
     <!--根据id更新数据库中对应的账号的登录时间-->

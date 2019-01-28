@@ -1,15 +1,17 @@
 package com.lunch.place.config;
 
 import com.lunch.place.entity.out.BasePlace;
+import com.lunch.place.feignService.IAccountService;
+import com.lunch.support.constants.Code;
 import com.lunch.support.exception.ParamsException;
-import com.lunch.support.exception.UsernameException;
-import com.lunch.support.tool.LogNewUtils;
-import com.lunch.support.tool.LogUtils;
+import com.lunch.support.exception.SessionOutException;
+import com.lunch.support.result.VerifyResult;
 import com.lunch.support.tool.StringUtils;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.aspectj.lang.annotation.Pointcut;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -38,11 +40,6 @@ public class RequestParamsAspect {
                 if (((BasePlace) arg).isEmpty()) {
                     throw new ParamsException("param error " + request.getRequestURL().toString());
                 }
-                if (!StringUtils.checkUsername(((BasePlace) arg).getUsername())) {
-                    LogNewUtils.info("username " + ((BasePlace) arg).getUsername() + " is not ok");
-                    throw new UsernameException("username invalid " + request.getRequestURL().toString());
-                }
-                break;
             }
         }
     }

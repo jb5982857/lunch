@@ -2,6 +2,7 @@ package com.lunch.support.tool;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.regex.Pattern;
 
 public class StringUtils {
 

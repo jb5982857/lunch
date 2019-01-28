@@ -1,6 +1,4 @@
-#!/bin/bash 
-
-
+#!/bin/bash
 declare -A default_port_map=(["account"]="8080" ["place"]="8081" ["zuul"]="80" ["eureka"]="8761")
 echo ${!default_port_map[@]}_$#
 

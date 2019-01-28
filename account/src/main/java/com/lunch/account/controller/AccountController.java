@@ -1,5 +1,6 @@
 package com.lunch.account.controller;
 
+import com.lunch.account.result.TokenResult;
 import com.lunch.support.constants.Code;
 import com.lunch.support.constants.S;
 import com.lunch.support.entity.BaseUser;
@@ -9,9 +10,11 @@ import com.lunch.account.result.AccountResult;
 import com.lunch.support.controller.BaseController;
 import com.lunch.support.result.BaseResult;
 import com.lunch.account.service.UserService;
+import com.lunch.support.result.VerifyResult;
 import com.lunch.support.tool.AuthImageUtils;
 import com.lunch.support.tool.LogNewUtils;
-import com.lunch.support.tool.LogUtils;
+import com.lunch.support.tool.StringUtils;
+import io.swagger.annotations.ApiModelProperty;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -38,7 +41,7 @@ public class AccountController extends BaseController {
 
         AccessUser user = userService.registerUser(baseUser);
         if (user != null) {
-            return new AccountResult(user.getSession(), user.getUsername(), user.getUid(), "1");
+            return new AccountResult(user.getSession().getResult(), user.getUsername(), user.getUid(), user.getToken().getResult(), "1");
         }
         return new BaseResult(Code.REGISTER_FAILED, S.REGISTER_FAILED);
     }
@@ -49,9 +52,51 @@ public class AccountController extends BaseController {
 
         AccessUser user = userService.login(baseUser);
         if (user != null) {
-            return new AccountResult(user.getSession(), user.getUsername(), user.getUid(), "1");
+            return new AccountResult(user.getSession().getResult(), user.getUsername(), user.getUid(), user.getToken().getResult(), "1");
         }
         return new BaseResult(Code.LOGIN_FAILED, S.LOGIN_FAILED);
+    }
+
+    @RequestMapping(value = "/quick_login", method = {RequestMethod.POST, RequestMethod.GET})
+    public BaseResult quickLogin(String session) {
+        LogNewUtils.info("quick_login :" + session);
+        if (StringUtils.isEmpty(session)) {
+            return PARAM_ERROR;
+        }
+
+        AccessUser user = userService.quickLogin(session);
+        if (user != null) {
+            return new AccountResult(user.getSession().getResult(), user.getUsername(), user.getUid(), user.getToken().getResult(), "1");
+        }
+        return new BaseResult(Code.VERIFY_FAILED, S.VERIFY_FAILED);
+    }
+
+    @RequestMapping(value = "/verify", method = {RequestMethod.POST, RequestMethod.GET})
+    public BaseResult verify(String session) {
+        LogNewUtils.info("verify :" + session);
+        if (StringUtils.isEmpty(session)) {
+            return PARAM_ERROR;
+        }
+
+        AccessUser user = userService.verify(session);
+        if (user != null) {
+            return new VerifyResult(user.getId());
+        }
+        return new BaseResult(Code.VERIFY_FAILED, S.VERIFY_FAILED);
+    }
+
+    @RequestMapping(value = "/token", method = {RequestMethod.POST, RequestMethod.GET})
+    public BaseResult token(String token) {
+        LogNewUtils.info("token :" + token);
+        if (StringUtils.isEmpty(token)) {
+            return PARAM_ERROR;
+        }
+
+        AccessUser user = userService.token(token);
+        if (user != null) {
+            return new TokenResult(user.getUid());
+        }
+        return new BaseResult(Code.VERIFY_FAILED, S.VERIFY_FAILED);
     }
 
     //修改密码
@@ -59,7 +104,7 @@ public class AccountController extends BaseController {
     public BaseResult changePassword(ChangePwdUser user) {
         AccessUser newUser = userService.changePwd(user);
         if (newUser != null) {
-            return new AccountResult(newUser.getSession(), newUser.getUsername(), newUser.getUid(), "1");
+            return new AccountResult(newUser.getSession().getResult(), newUser.getUsername(), newUser.getUid(), newUser.getToken().getResult(), "1");
         }
 
         return new BaseResult(Code.CHANGE_FAILED, S.CHANGE_FAILED);

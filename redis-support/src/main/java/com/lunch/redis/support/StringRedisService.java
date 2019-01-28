@@ -20,6 +20,10 @@ public class StringRedisService<T> extends BaseRedisService<T> {
         }
     }
 
+    public void put(String key, T domain) {
+        this.put(key, domain, -1);
+    }
+
     @Override
     public T get(String key) {
         return valueOperations.get(key);

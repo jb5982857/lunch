@@ -1,65 +1,38 @@
 package com.lunch.support.entity;
 
-public class Token {
+import com.alibaba.fastjson.JSON;
 
-    //private static final long serialVersionUID = -754659525548951914L;
+public class Token extends BaseOAuth {
+    private static final int TIME_OUT = 10 * 60 * 1000;
     private String signature;
-    private long timestamp;
 
     public Token() {
+
     }
 
     public Token(String signature, long timestamp) {
+        super(timestamp);
         if (signature == null) {
             throw new IllegalArgumentException("signature can not be null");
         }
-
-        this.timestamp = timestamp;
         this.signature = signature;
     }
 
     public Token(String signature) {
-        if (signature == null) {
-            throw new IllegalArgumentException("signature can not be null");
-        }
-
         this.signature = signature;
     }
 
-    /**
-     * Returns a string containing the unique signatureentifier assigned to this token.
-     */
-    public String getSignature() {
+    @Override
+    public String getResult() {
         return signature;
     }
 
-    public long getTimestamp() {
-        return timestamp;
-    }
-
-    /**
-     * timestamp 不予考虑, 因为就算 timestamp 不同也认为是相同的 token.
-     */
-    @Override
-    public int hashCode() {
-        return signature.hashCode();
-    }
-
-    /**
-     * 比较token
-     */
-    @Override
-    public boolean equals(Object object) {
-        if (object instanceof Token) {
-            return ((Token) object).signature.equals(this.signature);
-        }
-        return false;
+    public void setResult(String signature) {
+        this.signature = signature;
     }
 
     @Override
-    public String toString() {
-        return "Token [signature=" + signature + ", timestamp=" + timestamp
-                + "]";
+    protected int registerTime() {
+        return TIME_OUT;
     }
-
 }

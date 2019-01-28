@@ -5,10 +5,6 @@ import java.util.Calendar;
 import java.util.logging.Logger;
 
 public class UidUitls {
-    /**
-     * .log
-     */
-    private static final Logger logger = Logger.getLogger(UidUitls.class.getSimpleName());
 
     /**
      * The FieldPosition.
@@ -18,12 +14,12 @@ public class UidUitls {
     /**
      * This Format for format the data to special format.
      */
-    private final static Format dateFormat = new SimpleDateFormat("MMddHHmmssS");
+    private final static Format DATA_FORMAT = new SimpleDateFormat("MMddHHmmssS");
 
     /**
      * This Format for format the number to special format.
      */
-    private final static NumberFormat numberFormat = new DecimalFormat("0000");
+    private final static NumberFormat NUMBER_FORMAT = new DecimalFormat("0000");
 
     /**
      * This int is the sequence number ,the default value is 0.
@@ -40,15 +36,15 @@ public class UidUitls {
     public static synchronized String generateSequenceNo(String username) {
         Calendar rightNow = Calendar.getInstance();
         StringBuffer sb = new StringBuffer();
-        dateFormat.format(rightNow.getTime(), sb, HELPER_POSITION);
-        numberFormat.format(seq, sb, HELPER_POSITION);
+        DATA_FORMAT.format(rightNow.getTime(), sb, HELPER_POSITION);
+        NUMBER_FORMAT.format(seq, sb, HELPER_POSITION);
         if (seq == MAX) {
             seq = 0;
         } else {
             seq++;
         }
         String uid = MD5Utils.toMD5(sb.append(username).toString());
-        logger.info("username " + username + " is for uid " + uid);
+        LogNewUtils.info("username " + username + " is for uid " + uid);
 
         return uid;
     }

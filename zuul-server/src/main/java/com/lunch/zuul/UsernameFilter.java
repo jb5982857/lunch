@@ -3,17 +3,18 @@ package com.lunch.zuul;
 import com.lunch.support.constants.Code;
 import com.lunch.support.constants.S;
 import com.lunch.support.result.BaseResult;
+import com.lunch.support.tool.IPUtils;
 import com.lunch.support.tool.LogNewUtils;
-import com.lunch.support.tool.LogUtils;
 import com.lunch.support.tool.StringUtils;
 import com.netflix.zuul.ZuulFilter;
 import com.netflix.zuul.context.RequestContext;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 
-@Component
+//@Component
 public class UsernameFilter extends ZuulFilter {
     public static final String PARAM_ERROR = new BaseResult(Code.PARAMS_ERROR, StringUtils.string2Unicode(S.ERROR_PARAMS)).toJson();
 
@@ -42,6 +43,7 @@ public class UsernameFilter extends ZuulFilter {
     public Object run() {
         RequestContext ctx = RequestContext.getCurrentContext();
         HttpServletRequest request = ctx.getRequest();
+
         LogNewUtils.info(String.format("%s >>> %s", request.getMethod(), request.getRequestURL().toString()));
         String username = request.getParameter("username");
         if (username == null) {
