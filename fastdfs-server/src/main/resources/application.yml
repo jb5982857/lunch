@@ -1,0 +1,30 @@
+fdfs:
+  soTimeout: 1500
+  connectTimeout: 600
+  trackerList: 172.27.0.2:22122  #tracker路径，TrackerList参数,支持多个
+server:
+  port:  8084
+  tomcat:
+        max-threads: 800 # tomcat最大线程数，默认为200
+        uri-encoding: UTF-8
+        basedir: ../tmp #存放Tomcat的日志、Dump等文件的临时文件夹，默认为系统的tmp文件夹
+        accesslog:
+          enabled: true
+spring:
+  application:
+    name: service-fastdfs
+
+remote:
+  ip: 118.24.179.99
+
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://47.98.203.205:8761/eureka/
+    healthcheck:
+      enabled: true
+  instance:
+    prefer-ip-address: true
+    ip-address: ${remote.ip}
+    instance-id: FastDFS存储服务器:${remote.ip}:${server.port}

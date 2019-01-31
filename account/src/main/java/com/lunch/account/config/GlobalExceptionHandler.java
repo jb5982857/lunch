@@ -6,7 +6,6 @@ import com.lunch.support.exception.ParamsException;
 import com.lunch.support.exception.UsernameException;
 import com.lunch.support.result.BaseResult;
 import com.lunch.support.tool.LogNewUtils;
-import com.lunch.support.tool.LogUtils;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;

@@ -1,4 +1,4 @@
-package com.lunch.account.config;
+package com.lunch.fastdfs;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -9,8 +9,6 @@ import springfox.documentation.service.Contact;
 import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spring.web.plugins.Docket;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
-
-import javax.print.Doc;
 
 import static com.google.common.base.Predicates.or;
 import static springfox.documentation.builders.PathSelectors.regex;
@@ -30,47 +28,21 @@ public class SwaggerConfig {
     @Bean
     public Docket userApi() {
         return new Docket(DocumentationType.SWAGGER_2)
-                .groupName("user")
+                .groupName("fastfds")
                 .genericModelSubstitutes(DeferredResult.class)
                 .useDefaultResponseMessages(false)
                 .forCodeGeneration(true)
                 .pathMapping("/")
                 .select()
-                .paths(or(regex("/user/.*")))//需要显示的接口
+                .paths(or(regex("/fastdfs/.*")))//需要显示的接口
                 .build()
                 .apiInfo(userApiInfo());
     }
 
-    @Bean
-    public Docket testApi(){
-        return new Docket(DocumentationType.SWAGGER_2)
-                .groupName("test")
-                .genericModelSubstitutes(DeferredResult.class)
-                .useDefaultResponseMessages(false)
-                .forCodeGeneration(true)
-                .pathMapping("/")
-                .select()
-                .paths(or(regex("/test/.*")))//需要显示的接口
-                .build()
-                .apiInfo(testApiInfo());
-    }
-
     private ApiInfo userApiInfo() {
         return new ApiInfoBuilder()
-                .title("User API")//大标题
+                .title("FastDFS API")//大标题
                 .description("User REST API, all the applications could access the Object model data via JSON.")//详细描述
-                .version("1.0")//版本
-                .termsOfServiceUrl("NO terms of service")
-                .contact(new Contact("蒋博", "", "499432707@qq.com"))//作者
-                .license("The Apache License, Version 2.0")
-                .licenseUrl("http://www.apache.org/licenses/LICENSE-2.0.html")
-                .build();
-    }
-
-    private ApiInfo testApiInfo() {
-        return new ApiInfoBuilder()
-                .title("Test API")//大标题
-                .description("Test REST API, all the applications could access the Object model data via JSON.")//详细描述
                 .version("1.0")//版本
                 .termsOfServiceUrl("NO terms of service")
                 .contact(new Contact("蒋博", "", "499432707@qq.com"))//作者

@@ -14,7 +14,6 @@ import com.lunch.support.result.VerifyResult;
 import com.lunch.support.tool.AuthImageUtils;
 import com.lunch.support.tool.LogNewUtils;
 import com.lunch.support.tool.StringUtils;
-import io.swagger.annotations.ApiModelProperty;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;

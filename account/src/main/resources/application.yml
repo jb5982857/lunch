@@ -56,3 +56,7 @@ logging:
 context:
   listener:
     classes: com.lunch.account.ApplicationEventListener
+
+com:
+  lunch:
+    resources: http://res.emulate.org.cn/

@@ -16,6 +16,7 @@
         <module>zuul-server</module>
         <module>redis-support</module>
         <module>ip-server</module>
+        <module>fastdfs-server</module>
     </modules>
 
     <parent>

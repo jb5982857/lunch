@@ -4,7 +4,6 @@ import com.lunch.support.entity.BaseUser;
 import com.lunch.support.exception.ParamsException;
 import com.lunch.support.exception.UsernameException;
 import com.lunch.support.tool.LogNewUtils;
-import com.lunch.support.tool.LogUtils;
 import com.lunch.support.tool.StringUtils;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.Aspect;

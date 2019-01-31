@@ -1,25 +1,38 @@
 package com.lunch.account.controller;
 
+import com.lunch.account.feignService.IFastDFSService;
 import com.lunch.support.entity.AccessUser;
 import com.lunch.account.service.UserService;
 import com.lunch.support.controller.BaseController;
 import com.lunch.support.tool.LogNewUtils;
 import com.lunch.support.tool.LogUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
+import javax.annotation.Resource;
 import java.util.List;
 
 @RestController
+@RequestMapping("test")
 public class TestController extends BaseController {
+
+    @Value("${com.lunch.resources}")
+    private String res;
 
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private IFastDFSService fastDFSService;
+
     @GetMapping("/hello")
     public String hello() {
-        return "你好啊，傻逼许二娃111111222333333！";
+        return fastDFSService.hello();
     }
 
     @GetMapping("/user")
@@ -31,5 +44,10 @@ public class TestController extends BaseController {
     @GetMapping("/error")
     public String error(String username) {
         return "error1";
+    }
+
+    @RequestMapping(value = "/upload", method = RequestMethod.POST)
+    public String upload(MultipartFile file) {
+        return res + fastDFSService.upload(file);
     }
 }
