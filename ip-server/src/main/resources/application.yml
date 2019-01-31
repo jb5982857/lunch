@@ -1,5 +1,5 @@
 server:
-  port: 8082
+  port: 8083
   tomcat:
       max-threads: 800 # tomcat最大线程数，默认为200
       uri-encoding: UTF-8
