@@ -28,6 +28,7 @@ public class InterceptorConfigurerAdapter extends WebMvcConfigurerAdapter {
     public void addInterceptors(InterceptorRegistry registry) {
         // addPathPatterns 添加路径
         // excludePathPatterns 排除路径
-        registry.addInterceptor(zuulInterceptor()).addPathPatterns("/**");
+//        registry.addInterceptor(zuulInterceptor()).addPathPatterns("/**")
+//                .excludePathPatterns("/swagger-resources/**", "/webjars/**", "/v2/**", "/swagger-ui.html/**");
     }
 }

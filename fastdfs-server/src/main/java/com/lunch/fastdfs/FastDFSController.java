@@ -23,7 +23,14 @@ public class FastDFSController {
     @RequestMapping(value = "/upload", method = RequestMethod.POST)
     public String upload(@RequestParam("file") MultipartFile file) throws Exception {
         LogNewUtils.info("fastdfs upload:" + file.getOriginalFilename());
+
         return dfsClient.uploadFile(file);
+    }
+
+    @RequestMapping(value = "/delete", method = {RequestMethod.DELETE, RequestMethod.POST})
+    public void delete(@RequestParam("url") String url) {
+        LogNewUtils.info("fastdfs delete :" + url);
+        dfsClient.deleteFile(url);
     }
 
     @GetMapping(value = "/hello")

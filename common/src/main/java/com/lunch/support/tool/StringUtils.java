@@ -8,10 +8,11 @@ public class StringUtils {
 
     //账号的正则表达式，8-20位的数字和字母的组合
     private static final String USERNAME_REGEX = "^(?![0-9]+$)(?![a-zA-Z]+$)[0-9A-Za-z]{8,20}$";
+    private static final String PHONE_REGEX = "^((13[0-9])|(14[5,7])|(15[0-3,5-9])|(17[0,3,5-8])|(18[0-9])|166|198|199|(147))\\d{8}$";
 
     //检查账号的有效性
     public static boolean checkUsername(String username) {
-        return username.matches(USERNAME_REGEX);
+        return username.matches(PHONE_REGEX);
     }
 
     public static boolean isEmpty(String msg) {
@@ -41,6 +42,7 @@ public class StringUtils {
 
     /**
      * 字符串转换unicode
+     *
      * @param string
      * @return
      */

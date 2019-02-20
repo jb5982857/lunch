@@ -1,19 +1,15 @@
 package com.lunch.place.controller;
 
-import com.fasterxml.jackson.databind.annotation.JsonAppend;
-import com.lunch.place.config.PlaceFilter;
-import com.lunch.place.config.RequestParamsAspect;
+import com.lunch.place.config.GlobalExceptionHandler;
 import com.lunch.place.entity.in.Place;
 import com.lunch.place.entity.out.BasePlace;
 import com.lunch.place.entity.out.PlaceState;
-import com.lunch.place.result.PlaceResult;
 import com.lunch.place.service.PlaceService;
 import com.lunch.support.constants.Code;
 import com.lunch.support.constants.S;
 import com.lunch.support.controller.BaseController;
 import com.lunch.support.result.BaseResult;
 import com.lunch.support.tool.LogNewUtils;
-import com.lunch.support.tool.StringUtils;
 import io.swagger.annotations.ApiModelProperty;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -61,7 +57,7 @@ public class PlaceController extends BaseController {
             LogNewUtils.info("can not find place by session " + session);
             return new BaseResult(Code.QUERY_PLACE_NULL, S.QUERY_PLACE_EMPTY);
         }
-        return new PlaceResult(places);
+        return BaseResult.obtain(places);
     }
 
     //返回喜欢的地点
@@ -73,7 +69,7 @@ public class PlaceController extends BaseController {
             LogNewUtils.info("can not find place by session " + session);
             return new BaseResult(Code.QUERY_PLACE_NULL, S.QUERY_PLACE_EMPTY);
         }
-        return new PlaceResult(places);
+        return BaseResult.obtain(places);
     }
 
     //返回讨厌的地点
@@ -85,7 +81,7 @@ public class PlaceController extends BaseController {
             LogNewUtils.info("can not find place by session " + session);
             return new BaseResult(Code.QUERY_PLACE_NULL, S.QUERY_PLACE_EMPTY);
         }
-        return new PlaceResult(places);
+        return BaseResult.obtain(places);
     }
 
     //查询被添加的地方，即还没有被列为喜欢或者讨厌的地方
@@ -97,6 +93,11 @@ public class PlaceController extends BaseController {
             LogNewUtils.info("can not find place by session " + session);
             return new BaseResult(Code.QUERY_PLACE_NULL, S.QUERY_PLACE_EMPTY);
         }
-        return new PlaceResult(places);
+        return BaseResult.obtain(places);
+    }
+
+    @GetMapping("/session_out")
+    public BaseResult sessionOut() {
+        return GlobalExceptionHandler.SESSION_OUT;
     }
 }

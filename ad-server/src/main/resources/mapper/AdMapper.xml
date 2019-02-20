@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.lunch.ad.dao.AdDao">
+    <!--如果返回实体类，需要在这里定义-->
+    <resultMap id="AdResultMap" type="com.lunch.ad.entity.AdEntity">
+        <!--column:在数据库中的字段名称     property:java类中对应的变量名    jdbcType:数据库中该字段的类型-->
+        <result column="id" property="id" jdbcType="INTEGER"/>
+        <result column="company" property="company" jdbcType="VARCHAR"/>
+        <result column="url" property="url" jdbcType="VARCHAR"/>
+        <result column="during" property="during" jdbcType="INTEGER"/>
+        <result column="title" property="title" jdbcType="VARCHAR"/>
+        <result column="close" property="close" jdbcType="INTEGER"/>
+        <result column="action" property="action" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <!--复用的字段,通过include refid="Base_Column_List" 复用-->
+    <sql id="Account_Base_Column_List">
+        `id`, `company`, `url`, `during`, `title`, `close`, `action`
+    </sql>
+
+    <select id="queryById" resultMap="AdResultMap"
+            parameterType="java.lang.Integer">
+        SELECT
+        <include refid="Account_Base_Column_List"/>
+        FROM ad
+        WHERE `id` = #{id}
+    </select>
+</mapper>

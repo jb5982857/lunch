@@ -17,7 +17,6 @@ spring:
 remote:
   ip: 118.24.179.99
 
-
 eureka:
   client:
     serviceUrl:

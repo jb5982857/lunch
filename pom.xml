@@ -17,6 +17,7 @@
         <module>redis-support</module>
         <module>ip-server</module>
         <module>fastdfs-server</module>
+        <module>ad-server</module>
     </modules>
 
     <parent>

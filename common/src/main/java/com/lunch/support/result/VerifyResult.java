@@ -3,20 +3,13 @@ package com.lunch.support.result;
 import com.lunch.support.constants.Code;
 import com.lunch.support.constants.S;
 
-public class VerifyResult extends BaseResult {
+public class VerifyResult {
     private long userId;
 
-    public VerifyResult(){
-        super(Code.SUCCESS, S.SUCCESS);
-    }
-
-    public VerifyResult(int code, String desc, int userId) {
-        super(code, desc);
-        this.userId = userId;
+    public VerifyResult() {
     }
 
     public VerifyResult(long userId) {
-        super(Code.SUCCESS, S.SUCCESS);
         this.userId = userId;
     }
 

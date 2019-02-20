@@ -1,12 +1,18 @@
 package com.lunch.account.service;
 
+import com.lunch.account.constants.Mob;
 import com.lunch.account.dao.UserDao;
+import com.lunch.account.web.asClient.response.MobResponse;
+import com.lunch.account.web.asService.request.ForgetPwd;
+import com.lunch.account.web.asService.request.PhoneLogin;
+import com.lunch.account.web.asService.request.Register;
 import com.lunch.redis.support.StringRedisService;
 import com.lunch.support.entity.BaseUser;
 import com.lunch.support.entity.AccessUser;
 import com.lunch.support.entity.Session;
 import com.lunch.support.entity.Token;
-import com.lunch.account.entity.ChangePwdUser;
+import com.lunch.account.web.asService.request.ChangePwdUser;
+import com.lunch.support.http.HttpUtils;
 import com.lunch.support.service.BaseService;
 import com.lunch.support.tool.LogNewUtils;
 import com.lunch.support.tool.MD5Utils;
@@ -15,7 +21,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class UserService extends BaseService {
@@ -39,12 +47,18 @@ public class UserService extends BaseService {
     }
 
     //接口注册用户，这里需要做传入的user是否能够注册的判断
-    public AccessUser registerUser(BaseUser user) {
+    public AccessUser registerUser(Register user) {
         List<AccessUser> users = userDao.selectByUsername(user.getUsername());
         if (users.size() != 0) {
             LogNewUtils.warn("username " + user.getUsername() + " is exist");
             return null;
         }
+
+        if (!checkCode(user.getUsername(), user.getCode() + "")) {
+            LogNewUtils.error("code verify error!");
+            return null;
+        }
+
         AccessUser accessUser = registerAccessUser(user);
         //把生成的账号存入db中
         long id = userDao.registerByUser(accessUser);
@@ -66,7 +80,7 @@ public class UserService extends BaseService {
             }
 
             for (AccessUser oldUser : oldUsers) {
-                if (MD5Utils.toMD5(baseUser.getPassword()).equals(oldUser.getPassword())) {
+                if (baseUser.getPassword().equals(oldUser.getPassword())) {
                     //数据库中账号对过了，正确，那么把这个账号放入redis
                     saveUser2Redis(oldUser);
                     //更新数据的登录时间
@@ -78,7 +92,7 @@ public class UserService extends BaseService {
         }
 
         //进行redis验证
-        if (MD5Utils.toMD5(baseUser.getPassword()).equals(user.getPassword())) {
+        if (baseUser.getPassword().equals(user.getPassword())) {
             LogNewUtils.info("redis finish account :" + baseUser.getUsername());
             setToken(user);
             setSession(user);
@@ -90,6 +104,31 @@ public class UserService extends BaseService {
         //db和redis都验证失败了
         LogNewUtils.error("db and redis don't have username:" + baseUser.getUsername());
         return null;
+    }
+
+    public AccessUser phoneLogin(PhoneLogin phoneLogin) {
+        if (!checkCode(phoneLogin.getUsername(), phoneLogin.getCode() + "")) {
+            LogNewUtils.error("code verify error!");
+            return null;
+        }
+
+        AccessUser user = userRedisService.get(phoneLogin.getUsername());
+        if (user == null) {
+            List<AccessUser> oldUsers = userDao.selectByUsername(phoneLogin.getUsername());
+            if (oldUsers == null || oldUsers.size() == 0) {
+                LogNewUtils.info("can't find username in db");
+                return null;
+            }
+            saveUser2Redis(oldUsers.get(0));
+            updateLoginTime(oldUsers.get(0).getId());
+            return oldUsers.get(0);
+        }
+
+        setToken(user);
+        setSession(user);
+        saveUser2Redis(user);
+        updateLoginTime(user.getId());
+        return user;
     }
 
     public AccessUser quickLogin(String session) {
@@ -108,6 +147,32 @@ public class UserService extends BaseService {
         return null;
     }
 
+    public AccessUser forgetPwd(ForgetPwd forgetPwd) {
+        if (!checkCode(forgetPwd.getUsername(), forgetPwd.getCode() + "")) {
+            LogNewUtils.error("code verify error!");
+            return null;
+        }
+
+        List<AccessUser> dbUsers = userDao.selectByUsername(forgetPwd.getUsername());
+        if (dbUsers != null && !dbUsers.isEmpty()) {
+            LogNewUtils.info(String.format("find user %s in db", forgetPwd.getUsername()));
+            userDao.updatePwdById(dbUsers.get(0).getId(), forgetPwd.getNewPwd());
+
+            AccessUser user = userRedisService.get(forgetPwd.getUsername());
+            LogNewUtils.info("for get password ,find in redis :" + user);
+            if (user != null) {
+                user.setPassword(forgetPwd.getPassword());
+                setToken(user);
+                setSession(user);
+                saveUser2Redis(user);
+            }
+            return user;
+        }
+
+        LogNewUtils.info(String.format("can not find user %s in db", forgetPwd.getUsername()));
+        return null;
+    }
+
     public AccessUser verify(String session) {
         AccessUser user = userRedisService.get(session);
         if (user == null) {
@@ -119,6 +184,12 @@ public class UserService extends BaseService {
         }
         deleteUserInRedis(user);
         return null;
+    }
+
+    public AccessUser saveAvatar(AccessUser user) {
+        userDao.saveAvatar(user.getId(), user.getAvatar());
+        saveUser2Redis(user);
+        return user;
     }
 
     public AccessUser token(String token) {
@@ -153,12 +224,11 @@ public class UserService extends BaseService {
             return null;
         }
 
-        String md5Pwd = MD5Utils.toMD5(user.getPassword());
         for (AccessUser oldUser : oldUsers) {
-            if (oldUser.getPassword().equals(md5Pwd)) {
+            if (oldUser.getPassword().equals(user.getPassword())) {
                 //找到来密码
                 LogNewUtils.info("find user by username " + user.getUsername());
-                userDao.updatePwdById(oldUser.getId(), MD5Utils.toMD5(user.getNewPwd()));
+                userDao.updatePwdById(oldUser.getId(), user.getNewPwd());
                 LogNewUtils.info("update db is " + oldUser.getId());
                 AccessUser newUser = userDao.selectById(oldUser.getId());
                 LogNewUtils.info("newUser:" + newUser.toString());
@@ -246,5 +316,15 @@ public class UserService extends BaseService {
         if (user.hasToken()) {
             userRedisService.remove(user.getToken().getResult());
         }
+    }
+
+    private boolean checkCode(String phone, String code) {
+        Map<String, String> params = new HashMap<>();
+        params.put("appkey", Mob.APPKEY);
+        params.put("phone", phone);
+        params.put("zone", Mob.ZONE);
+        params.put("code", code);
+        MobResponse response = HttpUtils.syncRequestJson(HttpUtils.Method.POST, Mob.URL, params, MobResponse.class);
+        return response.isSuccess();
     }
 }

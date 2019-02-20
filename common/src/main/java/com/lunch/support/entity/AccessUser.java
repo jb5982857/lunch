@@ -18,13 +18,16 @@ public class AccessUser extends BaseUser {
     //token过期时间，存放在redis中
     private Token token = new Token("", 0);
 
+    //头像地址
+    private String avatar;
+
     public AccessUser() {
     }
 
     //密码做md5
     public AccessUser(BaseUser baseUser) {
         this.setUsername(baseUser.getUsername());
-        this.setPassword(MD5Utils.toMD5(baseUser.getPassword()));
+        this.setPassword(baseUser.getPassword());
     }
 
     public boolean hasToken() {
@@ -67,12 +70,22 @@ public class AccessUser extends BaseUser {
         this.phone = phone;
     }
 
+    public String getAvatar() {
+        return avatar;
+    }
+
+    public void setAvatar(String avatar) {
+        this.avatar = avatar;
+    }
+
     @Override
     public String toString() {
-        return "AccessUser{" + "username=" + getUsername() + "\'" + "password=" + getPassword() + "\'" +
+        return "AccessUser{" +
                 "uid='" + uid + '\'' +
-                ", session='" + session + '\'' +
+                ", session=" + session +
+                ", phone='" + phone + '\'' +
                 ", token=" + token +
+                ", avatar='" + avatar + '\'' +
                 '}';
     }
 }

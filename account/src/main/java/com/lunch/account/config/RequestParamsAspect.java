@@ -31,9 +31,13 @@ public class RequestParamsAspect {
         // 接收到请求，记录请求内容
         ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
         HttpServletRequest request = attributes.getRequest();
+        LogNewUtils.info("username:" + request.getParameter("username"));
+        LogNewUtils.info("password:" + request.getParameter("password"));
+        LogNewUtils.info(request.getParameterMap().toString());
 
         for (Object arg : joinPoint.getArgs()) {
             if (arg instanceof BaseUser) {
+                LogNewUtils.info("request baseuser " + arg.toString());
                 if (((BaseUser) arg).isEmpty()) {
                     throw new ParamsException("param error " + request.getRequestURL().toString());
                 }

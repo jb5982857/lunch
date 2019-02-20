@@ -32,7 +32,7 @@ public class TestController extends BaseController {
 
     @GetMapping("/hello")
     public String hello() {
-        return fastDFSService.hello();
+        return "你是个煞笔吗，自己礼物也不选，你在家不闲的慌吗，你知道鸡吃多了容易变成煞笔吗，网瘾少女！！！！！！";
     }
 
     @GetMapping("/user")

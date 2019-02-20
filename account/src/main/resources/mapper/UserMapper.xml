@@ -10,11 +10,12 @@
         <!--<result column="session" property="session" jdbcType="VARCHAR"/>-->
         <result column="uid" property="uid" jdbcType="VARCHAR"/>
         <result column="phone" property="phone" jdbcType="VARCHAR"/>
+        <result column="avatar" property="avatar" jdbcType="VARCHAR"/>
     </resultMap>
 
     <!--复用的字段,通过include refid="Base_Column_List" 复用-->
     <sql id="Account_Base_Column_List">
-        `id`, `username`, `password`, `uid`, `phone`
+        `id`, `username`, `password`, `uid`, `phone`, `avatar`
     </sql>
 
     <!--根据username来查用户信息-->
@@ -58,4 +59,8 @@
         <include refid="Account_Base_Column_List"/>
         FROM `account` WHERE `id`=#{id}
     </select>
+
+    <update id="saveAvatar">
+        UPDATE `account` SET `avatar`=#{avatar} WHERE `id`=#{id}
+    </update>
 </mapper>

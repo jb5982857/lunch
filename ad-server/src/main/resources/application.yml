@@ -1,0 +1,34 @@
+#端口号
+server:
+  port: 8085
+  tomcat:
+    max-threads: 800 # tomcat最大线程数，默认为200
+    uri-encoding: UTF-8
+    basedir: ../tmp #存放Tomcat的日志、Dump等文件的临时文件夹，默认为系统的tmp文件夹
+    accesslog:
+      enabled: true
+#mysql
+spring:
+  datasource:
+    driver-class-name: com.mysql.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/lunch?characterEncoding = utf8
+    username: root
+    password: wobuailq99
+  #eureka
+  application:
+    name: service-ad
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka/
+#    # 连接超时时间（毫秒）
+#    timeout: 0ms
+#mybatis
+mybatis:
+  type-aliases-package: com.lunch.ad.entity
+  mapperLocations: classpath:mapper/*.xml
+
+logging:
+  level:
+    com.lunch.ad.dao: debug

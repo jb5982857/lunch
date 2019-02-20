@@ -37,6 +37,9 @@ public class Code {
     //ip 被加入黑名单
     public static final int IP_ERROR = -10;
 
+    //头像文件保存出错
+    public static final int AVATAR_ERROR = -11;
+
     //rpc交互时服务器内部错误
     public static final int BASE_SERVER = -10000;
 

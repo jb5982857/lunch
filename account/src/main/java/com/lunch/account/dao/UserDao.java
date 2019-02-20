@@ -26,4 +26,7 @@ public interface UserDao {
 
     //根据id去查找用户
     AccessUser selectById(@Param("id") long id);
+
+    //保存图片
+    void saveAvatar(@Param("id") long id, @Param("avatar") String avatar);
 }

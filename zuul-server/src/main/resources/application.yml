@@ -23,3 +23,6 @@ zuul:
     place:
       path: /place/**
       serviceId: service-place
+    ad:
+      path: /ad/**
+      serviceId: service-ad
