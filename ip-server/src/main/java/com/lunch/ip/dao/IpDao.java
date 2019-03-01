@@ -5,5 +5,5 @@ import org.springframework.stereotype.Component;
 
 @Component
 public interface IpDao {
-    int getStateByIp(@Param("ip") String ip);
+    Integer getStateByIp(@Param("ip") String ip);
 }

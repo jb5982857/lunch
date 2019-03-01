@@ -5,7 +5,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
-@FeignClient(value = "service-ip")
+@FeignClient(value = "service-ip", fallback = IPFallbackImpl.class)
 public interface IPService {
     @RequestMapping(value = "/ip/check", method = RequestMethod.GET)
     boolean check(@RequestParam("ip") String ip);

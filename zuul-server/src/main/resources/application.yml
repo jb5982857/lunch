@@ -26,3 +26,6 @@ zuul:
     ad:
       path: /ad/**
       serviceId: service-ad
+    ip:
+      path: /ip/**
+      serviceId: service-ip
