@@ -8,6 +8,14 @@ public class BaseUser {
 
     private String password;
 
+    public BaseUser() {
+    }
+
+    public BaseUser(String username, String password) {
+        this.username = username;
+        this.password = password;
+    }
+
     public long getId() {
         return id;
     }
@@ -34,7 +42,7 @@ public class BaseUser {
 
     //检查是否参数有空
     public boolean isEmpty(String... excepts) {
-            return username == null || password == null;
+        return username == null || password == null;
     }
 
     @Override

@@ -1,5 +1,6 @@
 package com.lunch.account.controller;
 
+import com.lunch.account.config.GlobalExceptionHandler;
 import com.lunch.account.feignService.IFastDFSService;
 import com.lunch.account.web.asService.request.ForgetPwd;
 import com.lunch.account.web.asService.request.PhoneLogin;
@@ -12,11 +13,13 @@ import com.lunch.support.entity.AccessUser;
 import com.lunch.account.web.asService.request.ChangePwdUser;
 import com.lunch.account.web.asService.response.AccountResult;
 import com.lunch.support.controller.BaseController;
+import com.lunch.support.entity.ServiceEntity;
 import com.lunch.support.result.BaseResult;
 import com.lunch.account.service.UserService;
 import com.lunch.support.result.VerifyResult;
 import com.lunch.support.tool.AuthImageUtils;
 import com.lunch.support.tool.LogNewUtils;
+import com.lunch.support.tool.LogUtils;
 import com.lunch.support.tool.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -76,13 +79,17 @@ public class AccountController extends BaseController {
     }
 
     @RequestMapping(value = "/quick_login", method = {RequestMethod.POST, RequestMethod.GET})
-    public BaseResult quickLogin(String session) {
-        LogNewUtils.info("quick_login :" + session);
-        if (StringUtils.isEmpty(session)) {
+    public BaseResult quickLogin(String username, String session) {
+        LogNewUtils.info("quick_login : username " + username + " session " + session);
+        if (StringUtils.isEmpty(session, username)) {
             return PARAM_ERROR;
         }
 
-        AccessUser user = userService.quickLogin(session);
+        if (!StringUtils.checkUsername(username)) {
+            return USERNAME_INVALID;
+        }
+
+        AccessUser user = userService.quickLogin(username, session);
         if (user != null) {
             return BaseResult.obtain(new AccountResult(user.getSession().getResult(), user.getUsername(), user.getUid(), user.getToken().getResult(), "1", user.getAvatar()));
         }
@@ -92,21 +99,24 @@ public class AccountController extends BaseController {
     @RequestMapping(value = "/forget_password", method = {RequestMethod.POST, RequestMethod.GET})
     public BaseResult forgetPwd(ForgetPwd forgetPwd) {
         LogNewUtils.info("forget_password :" + forgetPwd.toString());
-        AccessUser user = userService.forgetPwd(forgetPwd);
-        if (user != null) {
-            return BaseResult.obtain(new AccountResult(user.getSession().getResult(), user.getUsername(), user.getUid(), user.getToken().getResult(), "1", user.getAvatar()));
+        ServiceEntity<AccessUser> user = userService.forgetPwd(forgetPwd);
+        if (user.isSuccess()) {
+            return BaseResult.obtain(new AccountResult(user.getData().getSession().getResult(), user.getData().getUsername(), user.getData().getUid(), user.getData().getToken().getResult(), "1", user.getData().getAvatar()));
         }
-        return new BaseResult(Code.CHANGE_FAILED, S.CHANGE_FAILED);
+        return new BaseResult(user.getCode(), user.getDesc());
     }
 
     @RequestMapping(value = "/send/avatar", method = RequestMethod.POST)
-    public BaseResult sendAvatar(String session, MultipartFile file) {
-        if (StringUtils.isEmpty(session)) {
+    public BaseResult sendAvatar(String username, String session, MultipartFile file) {
+        if (StringUtils.isEmpty(username, session)) {
             return PARAM_ERROR;
+        }
+        if (!StringUtils.checkUsername(username)) {
+            return USERNAME_INVALID;
         }
         LogNewUtils.info("send avatar ,session " + session + "  avatar  " + file.getOriginalFilename());
 
-        AccessUser user = userService.verify(session);
+        AccessUser user = userService.verify(username, session);
         if (user == null) {
             return new BaseResult(Code.VERIFY_FAILED, S.VERIFY_FAILED);
         }
@@ -128,31 +138,49 @@ public class AccountController extends BaseController {
     }
 
     @RequestMapping(value = "/verify", method = {RequestMethod.POST, RequestMethod.GET})
-    public BaseResult verify(String session) {
+    public BaseResult verify(String username, String session) {
         LogNewUtils.info("verify :" + session);
-        if (StringUtils.isEmpty(session)) {
+        if (StringUtils.isEmpty(session, username)) {
             return PARAM_ERROR;
         }
 
-        AccessUser user = userService.verify(session);
+        if (!StringUtils.checkUsername(username)) {
+            return USERNAME_INVALID;
+        }
+
+        AccessUser user = userService.verify(username, session);
         if (user != null) {
             return BaseResult.obtain(new VerifyResult(user.getId()));
         }
         return new BaseResult(Code.VERIFY_FAILED, S.VERIFY_FAILED);
     }
 
-    @RequestMapping(value = "/token", method = {RequestMethod.POST, RequestMethod.GET})
-    public BaseResult token(String token) {
-        LogNewUtils.info("token :" + token);
-        if (StringUtils.isEmpty(token)) {
-            return PARAM_ERROR;
+//    @RequestMapping(value = "/token", method = {RequestMethod.POST, RequestMethod.GET})
+//    public BaseResult token(String token) {
+//        LogNewUtils.info("token :" + token);
+//        if (StringUtils.isEmpty(token)) {
+//            return PARAM_ERROR;
+//        }
+//
+//        AccessUser user = userService.token(token);
+//        if (user != null) {
+//            return BaseResult.obtain(new TokenResult(user.getUid()));
+//        }
+//        return new BaseResult(Code.VERIFY_FAILED, S.VERIFY_FAILED);
+//    }
+
+    @RequestMapping(value = "/check", method = RequestMethod.POST)
+    public BaseResult check(String username) {
+        LogUtils.info("check username");
+        if (!StringUtils.checkUsername(username)) {
+            return GlobalExceptionHandler.USERNAME_INVALID;
         }
 
-        AccessUser user = userService.token(token);
-        if (user != null) {
-            return BaseResult.obtain(new TokenResult(user.getUid()));
+        ServiceEntity<AccessUser> entity = userService.check(username);
+        if (entity.getData() != null) {
+            return BaseResult.obtain(new BaseUser(entity.getData().getUsername(), entity.getData().getPassword()));
         }
-        return new BaseResult(Code.VERIFY_FAILED, S.VERIFY_FAILED);
+        return GlobalExceptionHandler.USERNAME_INVALID;
     }
 
     //修改密码

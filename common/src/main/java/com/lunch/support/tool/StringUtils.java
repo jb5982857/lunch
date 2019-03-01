@@ -15,8 +15,16 @@ public class StringUtils {
         return username.matches(PHONE_REGEX);
     }
 
-    public static boolean isEmpty(String msg) {
-        return null == msg || "".equals(msg);
+    public static boolean isEmpty(String... msgs) {
+        if (msgs == null) {
+            return true;
+        }
+        for (String msg : msgs) {
+            if (msg == null || "".equals(msg)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public static String encode(String str) {

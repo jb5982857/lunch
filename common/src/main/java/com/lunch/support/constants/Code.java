@@ -40,6 +40,9 @@ public class Code {
     //头像文件保存出错
     public static final int AVATAR_ERROR = -11;
 
+    //验证码失败
+    public static final int CODE_ERROR = -12;
+
     //rpc交互时服务器内部错误
     public static final int BASE_SERVER = -10000;
 

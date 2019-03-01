@@ -32,6 +32,7 @@ public class TestController extends BaseController {
 
     @GetMapping("/hello")
     public String hello() {
+        LogNewUtils.info("11111111");
         return "你是个煞笔吗，自己礼物也不选，你在家不闲的慌吗，你知道鸡吃多了容易变成煞笔吗，网瘾少女！！！！！！";
     }
 

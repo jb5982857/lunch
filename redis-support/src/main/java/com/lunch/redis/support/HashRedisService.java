@@ -9,7 +9,10 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 @Service
-public abstract class HashRedisService<T> extends BaseRedisService<T> {
+public class HashRedisService<T> extends BaseRedisService<T> {
+    public static final String DEFAULT_KEY = "hash_key";
+
+    public static final String TEMPLATE = "lunch_hash_key:";
     @Resource
     private HashOperations<String, String, T> hashOperations;
 
@@ -18,19 +21,36 @@ public abstract class HashRedisService<T> extends BaseRedisService<T> {
      *
      * @return
      */
-    protected abstract String getRedisKey();
+    protected String getRedisKey() {
+        return DEFAULT_KEY;
+    }
 
     @Override
-    public void put(String key, T doamin, long expire) {
-        hashOperations.put(getRedisKey(), key, doamin);
+    public void put(String hKey, T domain, long expire) {
+        hashOperations.put(TEMPLATE + getRedisKey(), hKey, domain);
         if (expire != -1) {
             redisTemplate.expire(getRedisKey(), expire, TimeUnit.SECONDS);
         }
     }
 
+    public void put(String key, String hKey, T domain, long expire) {
+        hashOperations.put(TEMPLATE + key, hKey, domain);
+        if (expire != -1) {
+            redisTemplate.expire(key, expire, TimeUnit.SECONDS);
+        }
+    }
+
+    public void put(String key, String hKey, T domain) {
+        put(key, hKey, domain, -1);
+    }
+
     @Override
-    public T get(String key) {
-        return hashOperations.get(getRedisKey(), key);
+    public T get(String hKey) {
+        return hashOperations.get(TEMPLATE + getRedisKey(), hKey);
+    }
+
+    public T get(String key, String hKey) {
+        return hashOperations.get(TEMPLATE + key, hKey);
     }
 
     @Override
@@ -38,14 +58,28 @@ public abstract class HashRedisService<T> extends BaseRedisService<T> {
         return hashOperations.keys(getRedisKey());
     }
 
-    @Override
-    public boolean isKeyExists(String key) {
-        return hashOperations.hasKey(getRedisKey(), key);
+    public Set<String> getKeys(String key) {
+        return hashOperations.keys(TEMPLATE + key);
     }
+
+    @Override
+    public boolean isKeyExists(String hKey) {
+        return hashOperations.hasKey(getRedisKey(), hKey);
+    }
+
+
+    public boolean isKeyExists(String key, String hKey) {
+        return hashOperations.hasKey(TEMPLATE + key, hKey);
+    }
+
 
     @Override
     public List<T> getAll() {
         return hashOperations.values(getRedisKey());
+    }
+
+    public List<T> getAll(String key) {
+        return hashOperations.values(TEMPLATE + key);
     }
 
     @Override
@@ -53,9 +87,22 @@ public abstract class HashRedisService<T> extends BaseRedisService<T> {
         return hashOperations.size(getRedisKey());
     }
 
+    public long count(String key) {
+        return hashOperations.size(TEMPLATE + key);
+    }
+
     @Override
     public void empty() {
         Set<String> set = hashOperations.keys(getRedisKey());
         set.stream().forEach(key -> hashOperations.delete(getRedisKey(), key));
+    }
+
+    public void empty(String key) {
+        Set<String> set = hashOperations.keys(TEMPLATE + key);
+        set.stream().forEach(setKey -> hashOperations.delete(getRedisKey(), setKey));
+    }
+
+    public void remove(String key, Object... hKeys) {
+        hashOperations.delete(TEMPLATE + key, hKeys);
     }
 }

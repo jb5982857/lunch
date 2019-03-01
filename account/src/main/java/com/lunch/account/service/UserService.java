@@ -6,11 +6,11 @@ import com.lunch.account.web.asClient.response.MobResponse;
 import com.lunch.account.web.asService.request.ForgetPwd;
 import com.lunch.account.web.asService.request.PhoneLogin;
 import com.lunch.account.web.asService.request.Register;
+import com.lunch.redis.support.HashRedisService;
 import com.lunch.redis.support.StringRedisService;
-import com.lunch.support.entity.BaseUser;
-import com.lunch.support.entity.AccessUser;
-import com.lunch.support.entity.Session;
-import com.lunch.support.entity.Token;
+import com.lunch.support.constants.Code;
+import com.lunch.support.constants.S;
+import com.lunch.support.entity.*;
 import com.lunch.account.web.asService.request.ChangePwdUser;
 import com.lunch.support.http.HttpUtils;
 import com.lunch.support.service.BaseService;
@@ -33,11 +33,14 @@ public class UserService extends BaseService {
     //图形验证码，十分钟过期
     private static final int IMAGE_CODE_INTERVAL = 10 * 60;
 
+    private static final String REDIS_HKEY_ACCOUNT = "account";
+    private static final String REDIS_HKEY_TOKEN = "session:";
+
     @Autowired
     private UserDao userDao;
 
     @Autowired
-    private StringRedisService<AccessUser> userRedisService;
+    private HashRedisService<AccessUser> userHashRedisService;
 
     @Autowired
     private StringRedisService<String> imageCodeRedisService;
@@ -71,7 +74,7 @@ public class UserService extends BaseService {
 
     //登录
     public AccessUser login(BaseUser baseUser) {
-        AccessUser user = userRedisService.get(baseUser.getUsername());
+        AccessUser user = userHashRedisService.get(baseUser.getUsername(), REDIS_HKEY_ACCOUNT);
         if (user == null) {
             List<AccessUser> oldUsers = userDao.selectByUsername(baseUser.getUsername());
             if (oldUsers == null || oldUsers.size() == 0) {
@@ -91,12 +94,11 @@ public class UserService extends BaseService {
             return null;
         }
 
+        LogNewUtils.info(String.format("find account %s in redis , toString is :%s", baseUser.getUsername(), user.toString()));
         //进行redis验证
         if (baseUser.getPassword().equals(user.getPassword())) {
             LogNewUtils.info("redis finish account :" + baseUser.getUsername());
-            setToken(user);
-            setSession(user);
-            saveUser2Redis(user);
+            saveUser2Redis(user, true);
             //更新数据库的登录时间
             return updateLoginTime(user.getId()) ? user : null;
         }
@@ -112,7 +114,7 @@ public class UserService extends BaseService {
             return null;
         }
 
-        AccessUser user = userRedisService.get(phoneLogin.getUsername());
+        AccessUser user = userHashRedisService.get(phoneLogin.getUsername());
         if (user == null) {
             List<AccessUser> oldUsers = userDao.selectByUsername(phoneLogin.getUsername());
             if (oldUsers == null || oldUsers.size() == 0) {
@@ -124,15 +126,13 @@ public class UserService extends BaseService {
             return oldUsers.get(0);
         }
 
-        setToken(user);
-        setSession(user);
-        saveUser2Redis(user);
+        saveUser2Redis(user, true);
         updateLoginTime(user.getId());
         return user;
     }
 
-    public AccessUser quickLogin(String session) {
-        AccessUser user = userRedisService.get(session);
+    public AccessUser quickLogin(String username, String session) {
+        AccessUser user = userHashRedisService.get(username, getSessionHKey(session));
         if (user == null) {
             return null;
         }
@@ -143,14 +143,14 @@ public class UserService extends BaseService {
             saveUser2Redis(user);
             return user;
         }
-        deleteUserInRedis(user);
+        deleteUserInRedis(user, getSessionHKey(session));
         return null;
     }
 
-    public AccessUser forgetPwd(ForgetPwd forgetPwd) {
+    public ServiceEntity<AccessUser> forgetPwd(ForgetPwd forgetPwd) {
         if (!checkCode(forgetPwd.getUsername(), forgetPwd.getCode() + "")) {
             LogNewUtils.error("code verify error!");
-            return null;
+            return new ServiceEntity<>(Code.CODE_ERROR, S.CODE_ERROR);
         }
 
         List<AccessUser> dbUsers = userDao.selectByUsername(forgetPwd.getUsername());
@@ -158,23 +158,21 @@ public class UserService extends BaseService {
             LogNewUtils.info(String.format("find user %s in db", forgetPwd.getUsername()));
             userDao.updatePwdById(dbUsers.get(0).getId(), forgetPwd.getNewPwd());
 
-            AccessUser user = userRedisService.get(forgetPwd.getUsername());
-            LogNewUtils.info("for get password ,find in redis :" + user);
+            AccessUser user = userHashRedisService.get(forgetPwd.getUsername(), REDIS_HKEY_ACCOUNT);
+            LogNewUtils.info("forget password ,find in redis :" + user);
             if (user != null) {
-                user.setPassword(forgetPwd.getPassword());
-                setToken(user);
-                setSession(user);
-                saveUser2Redis(user);
+                user.setPassword(forgetPwd.getNewPwd());
+                saveUser2Redis(user, true);
             }
-            return user;
+            return ServiceEntity.obtain(user);
         }
 
         LogNewUtils.info(String.format("can not find user %s in db", forgetPwd.getUsername()));
-        return null;
+        return new ServiceEntity<>(Code.CHANGE_FAILED, S.CHANGE_FAILED);
     }
 
-    public AccessUser verify(String session) {
-        AccessUser user = userRedisService.get(session);
+    public AccessUser verify(String username, String session) {
+        AccessUser user = userHashRedisService.get(username, getSessionHKey(session));
         if (user == null) {
             return null;
         }
@@ -182,7 +180,7 @@ public class UserService extends BaseService {
         if (user.hasSession() && user.getSession().compare(session)) {
             return user;
         }
-        deleteUserInRedis(user);
+        deleteUserInRedis(user, getSessionHKey(session));
         return null;
     }
 
@@ -192,23 +190,28 @@ public class UserService extends BaseService {
         return user;
     }
 
-    public AccessUser token(String token) {
-        AccessUser user = userRedisService.get(token);
-        if (user == null) {
-            return null;
-        }
-
-        if (user.hasSession() && user.getToken().compare(token)) {
-            updateLoginTime(user.getId());
-            return user;
-        }
-        return null;
-    }
+//    public AccessUser token(String token) {
+//        AccessUser user = userRedisService.get(token);
+//        if (user == null) {
+//            return null;
+//        }
+//
+//        if (user.hasSession() && user.getToken().compare(token)) {
+//            updateLoginTime(user.getId());
+//            return user;
+//        }
+//        return null;
+//    }
 
     //把图片验证码根据设备id存起来
     public void saveImageCodeByDeviceId(String deviceId, String code) {
         LogNewUtils.info("deviceId " + deviceId + " product code is " + code);
         imageCodeRedisService.put(deviceId, code, IMAGE_CODE_INTERVAL);
+    }
+
+    public ServiceEntity<AccessUser> check(String username) {
+        List<AccessUser> users = userDao.selectByUsername(username);
+        return new ServiceEntity<>(users.get(0));
     }
 
     //修改密码
@@ -287,19 +290,50 @@ public class UserService extends BaseService {
         return compare;
     }
 
-    private void saveUser2Redis(AccessUser user) {
-        AccessUser redisUser = userRedisService.get(user.getUsername());
-        deleteUserInRedis(redisUser);
-        if (!user.hasSession()) {
-            setSession(user);
+    /**
+     * 单纯的以username为key存在redis中，如果redis中包含这个key
+     *
+     * @param user   存入的对象
+     * @param update 是否强行更新session和token，如果为false，则考虑对象中是否有session和token，
+     *               没有就添加保证对象中一定有session和token
+     */
+    private void saveUser2Redis(AccessUser user, boolean update) {
+        //删除原来的session
+        if (user.hasSession()) {
+            AccessUser sessionUser = userHashRedisService.get(user.getUsername(), getSessionHKey(user.getSession().getResult()));
+            if (sessionUser != null) {
+                userHashRedisService.remove(user.getUsername(), getSessionHKey(user.getSession().getResult()));
+            }
         }
-        if (!user.hasToken()) {
+        //设置新的session和token
+        if (update) {
             setToken(user);
+            setSession(user);
+        } else {
+            if (!user.hasSession()) {
+                setSession(user);
+            }
+            if (!user.hasToken()) {
+                setToken(user);
+            }
         }
-        LogNewUtils.info("saveUser to redis ,user " + user.toString());
-        userRedisService.put(user.getSession().getResult(), user);
-        userRedisService.put(user.getToken().getResult(), user);
-        userRedisService.put(user.getUsername(), user);
+        //存入hkey为account的对象
+        userHashRedisService.put(user.getUsername(), REDIS_HKEY_ACCOUNT, user);
+        //存入hkey为session:{session}的对象
+        userHashRedisService.put(user.getUsername(), getSessionHKey(user.getSession().getResult()), user);
+    }
+
+    public void saveUser2Redis(AccessUser user) {
+        saveUser2Redis(user, false);
+    }
+
+    private void deleteUserInRedis(AccessUser user, String hKey) {
+        if (user == null) {
+            LogNewUtils.info("There is no bean in redis");
+            return;
+        }
+
+        userHashRedisService.remove(user.getUsername(), hKey);
     }
 
     private void deleteUserInRedis(AccessUser user) {
@@ -307,15 +341,7 @@ public class UserService extends BaseService {
             LogNewUtils.info("There is no bean in redis");
             return;
         }
-
-        userRedisService.remove(user.getUsername());
-        if (user.hasSession()) {
-            userRedisService.remove(user.getSession().getResult());
-        }
-
-        if (user.hasToken()) {
-            userRedisService.remove(user.getToken().getResult());
-        }
+        userHashRedisService.remove(user.getUsername());
     }
 
     private boolean checkCode(String phone, String code) {
@@ -326,5 +352,9 @@ public class UserService extends BaseService {
         params.put("code", code);
         MobResponse response = HttpUtils.syncRequestJson(HttpUtils.Method.POST, Mob.URL, params, MobResponse.class);
         return response.isSuccess();
+    }
+
+    private String getSessionHKey(String hKey) {
+        return REDIS_HKEY_TOKEN + hKey;
     }
 }

@@ -12,4 +12,5 @@ public class BaseController {
     public static final BaseResult PARAM_ERROR = new BaseResult(Code.PARAMS_ERROR, S.ERROR_PARAMS);
     public static final BaseResult INNER_ERROR = new BaseResult(Code.INNER_ERROR, S.INNER_ERROR);
     public static final BaseResult OK = new BaseResult(Code.SUCCESS, S.SUCCESS);
+    public static final BaseResult USERNAME_INVALID = new BaseResult(Code.PARAMS_ERROR, S.USERNAME_INVALID);
 }

@@ -1,5 +1,6 @@
 package com.lunch.support.entity;
 
+import com.lunch.support.constants.Code;
 import com.lunch.support.tool.MD5Utils;
 import com.lunch.support.tool.StringUtils;
 
@@ -24,7 +25,6 @@ public class AccessUser extends BaseUser {
     public AccessUser() {
     }
 
-    //密码做md5
     public AccessUser(BaseUser baseUser) {
         this.setUsername(baseUser.getUsername());
         this.setPassword(baseUser.getPassword());
@@ -80,7 +80,7 @@ public class AccessUser extends BaseUser {
 
     @Override
     public String toString() {
-        return "AccessUser{" +
+        return super.toString()+"|"+"AccessUser{" +
                 "uid='" + uid + '\'' +
                 ", session=" + session +
                 ", phone='" + phone + '\'' +
